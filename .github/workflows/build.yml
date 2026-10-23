@@ -206,7 +206,7 @@ jobs:
         if: steps.tg_check.outputs.enabled == 'true'
         uses: actions/download-artifact@v4
         with:
-          pattern: folkpatch-*
+          pattern: resignedpatch-*
           path: artifacts
           merge-multiple: true
 
