@@ -147,8 +147,8 @@ fun SettingScreen(navigator: DestinationsNavigator) {
     // nickname and signature are stored in shared preferences and the picked
     // image is copied into app storage.
     val prefs = APApplication.sharedPreferences
-    var profileNickname by remember { mutableStateOf(prefs.getString("profile_nickname", "").orEmpty()) }
-    var profileSignature by remember { mutableStateOf(prefs.getString("profile_signature", "").orEmpty()) }
+    var profileNickname by remember { mutableStateOf(prefs.getString("profile_nickname", "ResignedPatch").orEmpty().ifBlank { "ResignedPatch" }) }
+    var profileSignature by remember { mutableStateOf(prefs.getString("profile_signature", "ermpatch").orEmpty().ifBlank { "ermpatch" }) }
     var profileAvatar by remember { mutableStateOf(prefs.getString("profile_avatar", "").orEmpty()) }
     var profileAvatarOpacity by remember { mutableStateOf(prefs.getFloat("profile_avatar_opacity", 1f)) }
     var showProfileEditor by rememberSaveable { mutableStateOf(false) }
@@ -300,8 +300,8 @@ fun SettingScreen(navigator: DestinationsNavigator) {
             ) {
                 item(key = "identity_header") {
                     ProfileHeader(
-                        nickname = profileNickname.ifBlank { "FolkPatch" },
-                        signature = profileSignature,
+                        nickname = profileNickname.ifBlank { "ResignedPatch" },
+                        signature = profileSignature.ifBlank { "ermpatch" },
                         deviceName = getDeviceInfo().trim(),
                         avatarUri = profileAvatar,
                         avatarOpacity = profileAvatarOpacity,
@@ -440,8 +440,8 @@ fun SettingScreen(navigator: DestinationsNavigator) {
 
     if (showProfileEditor) {
         ProfileEditSheet(
-            nickname = profileNickname.ifBlank { "FolkPatch" },
-            signature = profileSignature,
+            nickname = profileNickname.ifBlank { "ResignedPatch" },
+            signature = profileSignature.ifBlank { "ermpatch" },
             avatarUri = profileAvatar,
             avatarOpacity = profileAvatarOpacity,
             onPickAvatar = { showAvatarSource = true },

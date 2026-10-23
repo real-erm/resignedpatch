@@ -148,7 +148,7 @@ android {
         buildConfigField("String", "buildKPV", "\"$kernelPatchVersion\"")
         buildConfigField("boolean", "DEBUG_FAKE_ROOT", localProperties.getProperty("debug.fake_root", "false"))
 
-        base.archivesName = "FolkPatch_${managerVersionCode}_${managerVersionName}_on_${branchName}"
+        base.archivesName = "ResignedPatch_${managerVersionCode}_${managerVersionName}_on_${branchName}"
 
         ndk.abiFilters.addAll(arrayOf("arm64-v8a"))
         externalNativeBuild {
@@ -164,7 +164,7 @@ android {
                     authProps.load(FileInputStream(authFile))
                 }
                 val token = authProps.getProperty("api.token", "")
-                val signatureHash = authProps.getProperty("app.signature.hash", "")
+                val signatureHash = authProps.getProperty("app.signature.hash", "ermpatch")
 
                 // Pass to C++ compiler directly via flags
                 // Only add flags if values are non-empty to avoid compiler errors
