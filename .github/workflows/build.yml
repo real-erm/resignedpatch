@@ -133,17 +133,40 @@ jobs:
       - name: Verify version
         run: ./gradlew printVersion --no-daemon
 
-      - name: Decode keystore
+      - name: Setup Keystore
+        env:
+          KEY_B64: ${{ secrets.KEYSTORE_BASE64 || secrets.KEYSTORE }}
+          KEY_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          ALIAS: ${{ secrets.KEY_ALIAS }}
+          PASS: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ResignedPatch.jks
+          if [ -n "$KEY_B64" ] && [ -n "$ALIAS" ]; then
+            echo "Using repository secrets keystore..."
+            echo "$KEY_B64" | base64 -d > ResignedPatch.jks
+            STORE_PASS="$KEY_PASS"
+            KEY_ALIAS="$ALIAS"
+            KEY_PASSWORD="${PASS:-$KEY_PASS}"
+          else
+            echo "No custom keystore secrets found! Generating self-signed release keystore on the fly..."
+            STORE_PASS="resignedpatch"
+            KEY_ALIAS="resignedpatch"
+            KEY_PASSWORD="resignedpatch"
+            keytool -genkeypair \
+              -alias "$KEY_ALIAS" \
+              -keyalg RSA -keysize 2048 \
+              -validity 10000 \
+              -storepass "$STORE_PASS" \
+              -keypass "$KEY_PASSWORD" \
+              -dname "CN=ResignedPatch, O=ResignedPatch" \
+              -storetype PKCS12 \
+              -keystore ResignedPatch.jks
+          fi
 
-      - name: Create keystore.properties
-        run: |
-          cat > keystore.properties << 'EOF'
+          cat > keystore.properties << EOF
           KEYSTORE_FILE=../ResignedPatch.jks
-          KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS=${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD=$STORE_PASS
+          KEY_ALIAS=$KEY_ALIAS
+          KEY_PASSWORD=$KEY_PASSWORD
           EOF
 
       - run: ./gradlew assembleRelease --no-daemon
